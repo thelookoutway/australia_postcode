@@ -42,6 +42,12 @@ module Australia
       earth_radius * c
     end
 
+    def nearby(distance:)
+      self.class.all.select do |other|
+        distance(other) <= distance
+      end
+    end
+
     alias_method :-, :distance
 
     # Inspects the [Postcode]
@@ -97,6 +103,10 @@ module Australia
         data.min_by { |postcode|
           (latitude - postcode.latitude) ** 2 + (longitude - postcode.longitude) ** 2
         }
+      end
+
+      def all
+        data
       end
 
     private
