@@ -33,11 +33,11 @@ module Australia
     # @return [Float]
     def distance(other)
       earth_radius = 6371
-      Δlat = radians(other.latitude - latitude)
-      Δlong = radians(other.longitude - longitude)
-      a = sin(Δlat / 2) * sin(Δlat / 2) +
+      lat = radians(other.latitude - latitude)
+      long = radians(other.longitude - longitude)
+      a = sin(lat / 2) * sin(lat / 2) +
           cos(radians(latitude)) * cos(radians(other.latitude)) *
-          sin(Δlong / 2) * sin(Δlong / 2)
+          sin(long / 2) * sin(long / 2)
       c = 2 * atan2(√(a), √(1 - a))
       earth_radius * c
     end
