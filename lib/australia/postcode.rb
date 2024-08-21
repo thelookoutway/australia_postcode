@@ -7,6 +7,8 @@ module Australia
   # methods for manipulating them. Right now you can find the distance between
   # two postcodes and that's about it.
   class Postcode
+    DELIVERY_AREA = "Delivery Area".freeze
+
     attr_reader :postcode, :suburb, :state, :delivery_center, :type, :latitude, :longitude
 
     def initialize(postcode, suburb, state, delivery_center, type, latitude, longitude)
@@ -85,6 +87,7 @@ module Australia
         }
       end
 
+      # @return [Array<Australia::Postcode>]
       def all
         data
       end
@@ -99,12 +102,23 @@ module Australia
         @indexed_on_suburb ||= data.group_by(&:suburb)
       end
 
+      # @return [Array<Australia::Postcode>]
       def data
-        @data ||= raw_data.map { |data| new(*data) }.select { |postcode| postcode.type == "Delivery Area" }
-      end
+        @data ||= CSV
+          .table(data_filename)
+          .each_with_object([]) do |row, acc|
+            next unless row[:type].start_with?(DELIVERY_AREA)
 
-      def raw_data
-        CSV.parse(File.read(data_filename)).drop(1)
+            acc.push(new(*row.fields(
+              :postcode,
+              :suburb,
+              :state,
+              :dc,
+              :type,
+              :lat,
+              :lon,
+            )))
+          end
       end
 
       def data_filename
