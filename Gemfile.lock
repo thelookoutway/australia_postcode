@@ -6,7 +6,7 @@ PATH
 GEM
   remote: http://rubygems.org/
   specs:
-    yard (0.8.3)
+    yard (0.9.36)
 
 PLATFORMS
   ruby
