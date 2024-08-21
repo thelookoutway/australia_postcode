@@ -1,4 +1,3 @@
-require "spec_helper"
 require "australia/postcode"
 
 RSpec.describe Australia::Postcode do
