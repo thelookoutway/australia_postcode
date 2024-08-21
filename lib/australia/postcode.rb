@@ -37,7 +37,7 @@ module Australia
       a = sin(delta_lat / 2) * sin(delta_lat / 2) +
         cos(radians(latitude)) * cos(radians(other.latitude)) *
         sin(delta_lon / 2) * sin(delta_lon / 2)
-      c = 2 * atan2(√(a), √(1 - a))
+      c = 2 * atan2(sqrt(a), sqrt(1 - a))
       earth_radius * c
     end
     alias_method :-, :distance
@@ -55,28 +55,10 @@ module Australia
 
     private
 
-    def sin(θ)
-      Math.sin θ
-    end
-
-    def cos(θ)
-      Math.cos θ
-    end
-
-    def atan2(y, x)
-      Math.atan2 y, x
-    end
-
-    def √(x)
-      Math.sqrt x
-    end
+    include Math
 
     def radians(degrees)
-      degrees * π / 180
-    end
-
-    def π
-      Math::PI
+      degrees * PI / 180
     end
 
     class << self
