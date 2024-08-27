@@ -33,13 +33,19 @@ module Australia
     # @return [Float]
     def distance(other)
       earth_radius = 6371
-      Δlat = radians(other.latitude - latitude)
-      Δlong = radians(other.longitude - longitude)
-      a = sin(Δlat / 2) * sin(Δlat / 2) +
+      delta_lat = radians(other.latitude - latitude)
+      delta_lon = radians(other.longitude - longitude)
+      a = sin(delta_lat / 2) * sin(delta_lat / 2) +
           cos(radians(latitude)) * cos(radians(other.latitude)) *
-          sin(Δlong / 2) * sin(Δlong / 2)
+          sin(delta_lon / 2) * sin(delta_lon / 2)
       c = 2 * atan2(√(a), √(1 - a))
       earth_radius * c
+    end
+
+    def nearby(distance:)
+      self.class.all.select do |other|
+        distance(other) <= distance
+      end
     end
 
     alias_method :-, :distance
@@ -97,6 +103,10 @@ module Australia
         data.min_by { |postcode|
           (latitude - postcode.latitude) ** 2 + (longitude - postcode.longitude) ** 2
         }
+      end
+
+      def all
+        data
       end
 
     private
