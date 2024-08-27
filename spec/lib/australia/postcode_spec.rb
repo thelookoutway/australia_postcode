@@ -1,10 +1,15 @@
-require "spec_helper"
 require "australia/postcode"
 
 RSpec.describe Australia::Postcode do
+  describe ".all" do
+    it "contains the expected number of Postcode" do
+      expect(described_class.all.length).to eq(15552)
+    end
+  end
+
   describe ".find" do
     it "finds the postcode" do
-      postcodes = Australia::Postcode.find(4000)
+      postcodes = described_class.find(4000)
       expect(postcodes.size).to eq(3)
 
       postcode = postcodes.first
@@ -15,7 +20,7 @@ RSpec.describe Australia::Postcode do
   end
 
   describe "#nearby" do
-    let(:postcode) { Australia::Postcode.find(4000).first }
+    let(:postcode) { described_class.find(4000).first }
 
     it "finds all postcodes within 3 km" do
       others = postcode.nearby(distance: 3)

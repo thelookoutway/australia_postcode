@@ -1,6 +1,5 @@
-# coding: utf-8
-require "csv"
 require "australia/postcode/version"
+require "csv"
 
 # A module for all things Australian
 module Australia
@@ -8,16 +7,18 @@ module Australia
   # methods for manipulating them. Right now you can find the distance between
   # two postcodes and that's about it.
   class Postcode
+    DELIVERY_AREA = "Delivery Area".freeze
+
     attr_reader :postcode, :suburb, :state, :delivery_center, :type, :latitude, :longitude
 
     def initialize(postcode, suburb, state, delivery_center, type, latitude, longitude)
-      @postcode         = postcode.to_i
-      @suburb           = suburb.strip
-      @state            = state.strip
-      @delivery_center  = delivery_center.strip
-      @type             = type.strip
-      @latitude         = latitude.to_f
-      @longitude        = longitude.to_f
+      @postcode = postcode.to_i
+      @suburb = suburb.strip
+      @state = state.strip
+      @delivery_center = delivery_center.strip
+      @type = type.strip
+      @latitude = latitude.to_f
+      @longitude = longitude.to_f
     end
 
     # Returns a [latitude, longitude] tuple
@@ -36,11 +37,12 @@ module Australia
       delta_lat = radians(other.latitude - latitude)
       delta_lon = radians(other.longitude - longitude)
       a = sin(delta_lat / 2) * sin(delta_lat / 2) +
-          cos(radians(latitude)) * cos(radians(other.latitude)) *
-          sin(delta_lon / 2) * sin(delta_lon / 2)
-      c = 2 * atan2(√(a), √(1 - a))
+        cos(radians(latitude)) * cos(radians(other.latitude)) *
+        sin(delta_lon / 2) * sin(delta_lon / 2)
+      c = 2 * atan2(sqrt(a), sqrt(1 - a))
       earth_radius * c
     end
+    alias_method :-, :distance
 
     def nearby(distance:)
       self.class.all.select do |other|
@@ -48,37 +50,17 @@ module Australia
       end
     end
 
-    alias_method :-, :distance
-
     # Inspects the [Postcode]
     def inspect
       "#<#{self.class} postcode=#{postcode.inspect} suburb=#{suburb.inspect} latitude=#{latitude.inspect} longitude=#{longitude.inspect}>"
     end
 
-  private
+    private
 
-    def sin(θ)
-      Math.sin θ
-    end
-
-    def cos(θ)
-      Math.cos θ
-    end
-
-    def atan2(y, x)
-      Math.atan2 y, x
-    end
-
-    def √(x)
-      Math.sqrt x
-    end
+    include Math
 
     def radians(degrees)
-      degrees * π / 180
-    end
-
-    def π
-      Math::PI
+      degrees * PI / 180
     end
 
     class << self
@@ -105,11 +87,13 @@ module Australia
         }
       end
 
+      # @return [Array<Australia::Postcode>]
       def all
         data
       end
 
-    private
+      private
+
       def indexed_on_postcode
         @indexed_on_postcode ||= data.group_by(&:postcode)
       end
@@ -118,12 +102,23 @@ module Australia
         @indexed_on_suburb ||= data.group_by(&:suburb)
       end
 
+      # @return [Array<Australia::Postcode>]
       def data
-        @data ||= raw_data.map { |data| new(*data) }.select { |postcode| postcode.type == "Delivery Area" }
-      end
+        @data ||= CSV
+          .table(data_filename)
+          .each_with_object([]) do |row, acc|
+            next unless row[:type].start_with?(DELIVERY_AREA)
 
-      def raw_data
-        CSV.parse(File.read(data_filename)).drop(1)
+            acc.push(new(*row.fields(
+              :postcode,
+              :suburb,
+              :state,
+              :dc,
+              :type,
+              :lat,
+              :lon,
+            )))
+          end
       end
 
       def data_filename

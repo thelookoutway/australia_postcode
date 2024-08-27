@@ -15,7 +15,6 @@ Gem::Specification.new do |s|
     lib/australia/postcode/data.csv
   )
 
-  s.add_development_dependency "byebug"
+  s.add_dependency "csv"
   s.add_development_dependency "rspec"
-  s.add_development_dependency "yard"
 end
